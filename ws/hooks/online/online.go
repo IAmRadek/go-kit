@@ -3,7 +3,7 @@ package online
 import (
 	"expvar"
 
-	"github.com/RadekD/go-kit/ws"
+	"github.com/IAmRadek/go-kit/ws"
 )
 
 var online = expvar.NewInt("websocket_connections")

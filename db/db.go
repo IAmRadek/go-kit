@@ -10,7 +10,7 @@ import (
 
 var ErrBadAffectedCount = errors.New("bad affected count")
 
-//CheckAffected checks if result.RowsAffected() are equal to the expected
+// CheckAffected checks if result.RowsAffected() are equal to the expected
 func CheckAffected(rslt sql.Result, sqlErr error, expected ...int) error {
 	if sqlErr != nil {
 		return sqlErr
@@ -30,7 +30,7 @@ func CheckAffected(rslt sql.Result, sqlErr error, expected ...int) error {
 	return ErrBadAffectedCount
 }
 
-//IsMySQLDuplicate checks if mysql error is ER_DUP_ENTRY mysql error
+// IsMySQLDuplicate checks if mysql error is ER_DUP_ENTRY mysql error
 func IsMySQLDuplicate(err error) bool {
 	if val, ok := err.(*myMysql.Error); ok && val.Code == myMysql.ER_DUP_ENTRY {
 		return true

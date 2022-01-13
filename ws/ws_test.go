@@ -5,7 +5,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/RadekD/go-kit/ws"
+	"github.com/IAmRadek/go-kit/ws"
 	"github.com/posener/wstest"
 	"github.com/sirupsen/logrus"
 )
@@ -83,9 +83,7 @@ func Test(t *testing.T) {
 		{"testInsidePointer", wsTestInsidePointer},
 	}
 
-	ws := &ws.WS{
-		Log: log,
-	}
+	ws := ws.NewWS(nil, func(connection *ws.Connection, err error) {})
 	for _, h := range handlers {
 		ws.RegisterHandler(h.Name, h.Handler)
 	}
@@ -103,7 +101,7 @@ func Test(t *testing.T) {
 	for _, test := range tests {
 		test := test
 		t.Run(test.Test.Topic, func(t *testing.T) {
-			dial := wstest.NewDialer(ws, nil)
+			dial := wstest.NewDialer(ws)
 			conn, _, err := dial.Dial("ws://example.org/websocket", nil)
 			if err != nil {
 				t.Error(err)
@@ -123,7 +121,7 @@ func Test(t *testing.T) {
 	}
 
 	t.Run("testBadType", func(t *testing.T) {
-		dial := wstest.NewDialer(ws, nil)
+		dial := wstest.NewDialer(ws)
 		conn, _, err := dial.Dial("ws://example.org/websocket", nil)
 		if err != nil {
 			t.Error(err)
@@ -141,7 +139,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("testBadType2", func(t *testing.T) {
-		dial := wstest.NewDialer(ws, nil)
+		dial := wstest.NewDialer(ws)
 		conn, _, err := dial.Dial("ws://example.org/websocket", nil)
 		if err != nil {
 			t.Error(err)

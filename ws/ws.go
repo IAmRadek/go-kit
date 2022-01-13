@@ -3,35 +3,48 @@ package ws
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/pkg/errors"
 )
 
-var ErrUnknowHandler = errors.New("ws: unknown handler")
+type WS interface {
+	// RegisterHandler register function for entered topic
+	// note that handlerFn is interface{} but should be function (func(r *Request, optionalParameter string))
+	RegisterHandler(topic string, handlerFn interface{})
+
+	//AddPreHook appends pre main loop hook
+	AddPreHook(hook Hook)
+
+	//AddPostHook appends post request hook
+	AddPostHook(hook Hook)
+
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
+}
+
+func NewWS(upgrader *websocket.Upgrader, errorHandler func(*Connection, error)) WS {
+	if upgrader == nil {
+		upgrader = &websocket.Upgrader{}
+	}
+	return &ws{
+		ErrorHandler: errorHandler,
+		Upgrader:     upgrader,
+	}
+}
+
+var ErrUnknownHandler = errors.New("ws: unknown handler")
 var ErrInvalidPacket = errors.New("ws: invalid packet")
-
-//SM is a helper for simple messages with success and message only
-
-type sm struct {
-	Success bool
-	Message string
-}
-
-func SM(success bool, message string) sm {
-	return sm{success, message}
-}
 
 type handler func(r *Request) error
 
-//Hook is function called before main loop or after connection was closed
+// Hook is function called before main loop or after connection was closed
 type Hook func(conn *Connection)
 
-//Connection holds all data and websocket connection
+// Connection holds all data and websocket connection
 type Connection struct {
 	l    sync.Mutex
 	conn *websocket.Conn
@@ -69,9 +82,9 @@ func (r *Request) Respond(data interface{}) error {
 	return r.C.Send(r.ID, r.Topic, data)
 }
 
-type WS struct {
+type ws struct {
 	ErrorHandler func(c *Connection, err error)
-	Upgrader     websocket.Upgrader
+	Upgrader     *websocket.Upgrader
 
 	handlers  map[string]handler
 	preHooks  []Hook
@@ -80,9 +93,9 @@ type WS struct {
 
 var rTest = reflect.TypeOf(&Request{})
 
-//RegisterHandler register function for entered topic
+// RegisterHandler register function for entered topic
 // note that handlerFn is interface{} but should be function (func(r *Request, optionalParameter string))
-func (m *WS) RegisterHandler(topic string, handlerFn interface{}) {
+func (m *ws) RegisterHandler(topic string, handlerFn interface{}) {
 	if m.handlers == nil {
 		m.handlers = make(map[string]handler)
 	}
@@ -109,7 +122,6 @@ func (m *WS) RegisterHandler(topic string, handlerFn interface{}) {
 	}
 
 	m.handlers[topic] = func(r *Request) error {
-
 		var toFn []reflect.Value
 		toFn = append(toFn, reflect.ValueOf(r))
 
@@ -130,16 +142,16 @@ func (m *WS) RegisterHandler(topic string, handlerFn interface{}) {
 }
 
 //AddPreHook appends pre main loop hook
-func (m *WS) AddPreHook(hook Hook) {
+func (m *ws) AddPreHook(hook Hook) {
 	m.preHooks = append(m.preHooks, hook)
 }
 
 //AddPostHook appends post request hook
-func (m *WS) AddPostHook(hook Hook) {
+func (m *ws) AddPostHook(hook Hook) {
 	m.postHooks = append(m.postHooks, hook)
 }
 
-func (m *WS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (m *ws) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -147,7 +159,7 @@ func (m *WS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	ws, err := m.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		m.ErrorHandler(nil, fmt.Errorf("Error: %w = could not upgrade connection", err))
+		m.ErrorHandler(nil, fmt.Errorf("error: %w = could not upgrade connection", err))
 		return
 	}
 	defer ws.Close()
@@ -168,10 +180,10 @@ func (m *WS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		var message Request
-		err := ws.ReadJSON(&message)
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err) {
-				m.ErrorHandler(conn, fmt.Errorf("Error: %w = socket closed", err))
+		readErr := ws.ReadJSON(&message)
+		if readErr != nil {
+			if websocket.IsUnexpectedCloseError(readErr) {
+				m.ErrorHandler(conn, fmt.Errorf("error: %w = socket closed", readErr))
 			}
 			break
 		}
@@ -181,17 +193,17 @@ func (m *WS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		handler, ok := m.handlers[message.Topic]
+		handlerFn, ok := m.handlers[message.Topic]
 		if !ok {
-			m.ErrorHandler(conn, errors.Wrapf(ErrUnknowHandler, "handler: %s", message.Topic))
+			m.ErrorHandler(conn, fmt.Errorf("%w: %s", ErrUnknownHandler, message.Topic))
 			continue
 		}
 
 		message.C = conn
 
-		err = handler(&message) // only error I can get here is from json.Unmarshal
-		if err != nil {
-			m.ErrorHandler(conn, errors.Wrapf(err, "handler: %s", message.Topic))
+		handlerErr := handlerFn(&message)
+		if handlerErr != nil {
+			m.ErrorHandler(conn, fmt.Errorf("error: %w in handler: %s", err, message.Topic))
 			break
 		}
 	}
@@ -200,15 +212,3 @@ func (m *WS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hook(conn)
 	}
 }
-
-/*
-&WS{
-		Upgrader: websocket.Upgrader{
-			ReadBufferSize:  10240,
-			WriteBufferSize: 10240,
-			CheckOrigin: func(r *http.Request) bool {
-				return true
-			},
-		},
-	}
-*/
