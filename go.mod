@@ -1,6 +1,6 @@
 module github.com/IAmRadek/go-kit
 
-go 1.17
+go 1.18
 
 require (
 	github.com/RadekD/go-kit v0.0.0-20210417113000-fc9f681cae51

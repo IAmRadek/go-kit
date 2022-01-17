@@ -2,13 +2,14 @@ package ip
 
 import (
 	"fmt"
-	"github.com/sebest/xff"
 	"net"
 	"net/http"
 	"os"
+
+	"github.com/sebest/xff"
 )
 
-//MustGetPublic returns ip from request
+// MustGetPublicFromRequest returns ip from request
 func MustGetPublicFromRequest(r *http.Request) string {
 	ip, _, err := net.SplitHostPort(xff.GetRemoteAddr(r))
 

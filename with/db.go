@@ -3,11 +3,7 @@ package with
 import (
 	"context"
 	"database/sql"
-	"errors"
 )
-
-//ErrRollback is used stop with.Tx
-var ErrRollback = errors.New("ErrRollback")
 
 //TxFunc is func used to perform inside transaction
 type TxFunc func(tx *sql.Tx) error
@@ -29,7 +25,6 @@ func TxContext(ctx context.Context, dbConn *sql.DB, fn TxFunc, opts ...*sql.TxOp
 		return
 	}
 
-	//defer is used in case fn panics
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
