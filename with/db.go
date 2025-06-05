@@ -5,15 +5,15 @@ import (
 	"database/sql"
 )
 
-//TxFunc is func used to perform inside transaction
+// TxFunc is func used to perform inside transaction.
 type TxFunc func(tx *sql.Tx) error
 
-//Tx (with.Tx()) encapsulates common pattern of transaction
+// Tx (with.Tx()) encapsulates common pattern of transaction.
 func Tx(dbConn *sql.DB, fn TxFunc, opts ...*sql.TxOptions) error {
 	return TxContext(context.Background(), dbConn, fn, opts...)
 }
 
-//TxContext encapsulates common pattern of transaction
+// TxContext encapsulates common pattern of transaction.
 func TxContext(ctx context.Context, dbConn *sql.DB, fn TxFunc, opts ...*sql.TxOptions) (err error) {
 	var opt *sql.TxOptions = nil
 	if len(opts) > 0 {

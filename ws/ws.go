@@ -17,10 +17,10 @@ type WS interface {
 	// note that handlerFn is interface{} but should be function (func(r *Request, optionalParameter string))
 	RegisterHandler(topic string, handlerFn interface{})
 
-	//AddPreHook appends pre main loop hook
+	// AddPreHook appends pre main loop hook
 	AddPreHook(hook Hook)
 
-	//AddPostHook appends post request hook
+	// AddPostHook appends post request hook
 	AddPostHook(hook Hook)
 
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
@@ -68,7 +68,7 @@ func (conn *Connection) Send(id int64, topic string, data interface{}) error {
 	}{id, topic, data})
 }
 
-//Request represents data sends from client to server
+// Request represents data sends from client to server
 type Request struct {
 	C *Connection `json:"-"`
 
@@ -77,7 +77,7 @@ type Request struct {
 	Data  json.RawMessage
 }
 
-//Respond sends response to client and returns error if failed
+// Respond sends response to client and returns error if failed
 func (r *Request) Respond(data interface{}) error {
 	return r.C.Send(r.ID, r.Topic, data)
 }
@@ -141,12 +141,12 @@ func (m *ws) RegisterHandler(topic string, handlerFn interface{}) {
 	}
 }
 
-//AddPreHook appends pre main loop hook
+// AddPreHook appends pre main loop hook
 func (m *ws) AddPreHook(hook Hook) {
 	m.preHooks = append(m.preHooks, hook)
 }
 
-//AddPostHook appends post request hook
+// AddPostHook appends post request hook
 func (m *ws) AddPostHook(hook Hook) {
 	m.postHooks = append(m.postHooks, hook)
 }

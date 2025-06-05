@@ -27,8 +27,10 @@ func (t *jsonTime) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-/*Day represents open hours in one day
+/*
+Day represents open hours in one day
 Opening hours must comply with the following form:
+
 	["open", "close", ...]
 */
 type Day []jsonTime
@@ -37,11 +39,11 @@ type Week [7][]jsonTime
 
 type Opens []jsonTime
 
-//Range contains two time, open and close
+// Range contains two time, open and close
 type Range [2]jsonTime
 
-//IsOpen checks if time t is in range
-func (r *Range) IsOpen(t time.Time) bool {
+// IsOpen checks if time t is in range
+func (r Range) IsOpen(t time.Time) bool {
 	h, m, _ := t.Clock()
 
 	h1, m1, _ := r[0].Clock()

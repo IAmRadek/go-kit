@@ -2,15 +2,11 @@ package ws_test
 
 import (
 	"encoding/json"
-	"io"
 	"testing"
 
 	"github.com/IAmRadek/go-kit/ws"
 	"github.com/posener/wstest"
-	"github.com/sirupsen/logrus"
 )
-
-var log = logrus.New()
 
 type testStruct struct {
 	Test string
@@ -70,8 +66,6 @@ type expected struct {
 }
 
 func Test(t *testing.T) {
-	log.Out = io.MultiWriter()
-
 	handlers := []struct {
 		Name    string
 		Handler interface{}

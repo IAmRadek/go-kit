@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/RadekD/go-kit/timerange"
+	"github.com/IAmRadek/go-kit/timerange"
 )
 
 func tMust(h string) time.Time {

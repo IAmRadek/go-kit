@@ -1,16 +1,17 @@
-//Package ping provides hook for pinging websocket every 5 seconds
+// Package ping provides hook for pinging websocket every 5 seconds
 //
-//TODO:
+// TODO:
+//
 //	Add configuration
 package ping
 
 import (
 	"time"
 
-	"github.com/RadekD/go-kit/ws"
+	"github.com/IAmRadek/go-kit/ws"
 )
 
-//Hook is
+// Hook is
 func Hook(c *ws.Connection) {
 	ctx := c.Context()
 	go func() {

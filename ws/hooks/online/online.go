@@ -8,17 +8,17 @@ import (
 
 var online = expvar.NewInt("websocket_connections")
 
-//PreHook increments online
+// PreHook increments online
 func PreHook(conn *ws.Connection) {
 	online.Add(1)
 }
 
-//PostHook decrements online
+// PostHook decrements online
 func PostHook(conn *ws.Connection) {
 	online.Add(-1)
 }
 
-//Get returns online number in safe way
+// Get returns online number in safe way
 func Get() int64 {
 	return online.Value()
 }
