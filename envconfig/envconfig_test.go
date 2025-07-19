@@ -40,6 +40,12 @@ type Config struct {
 
 type SubConfig struct {
 	A string `env:"AA"`
+
+	SubSub SubSubConfig `prefix:"SUB2"`
+}
+
+type SubSubConfig struct {
+	A string `env:"FF" required:"true"`
 }
 
 type CustomTextUnmarshaler struct {
@@ -78,6 +84,8 @@ func TestRead(t *testing.T) {
 			return "1h,2h,3h", true
 		case "MDUR":
 			return "key1=1h,key2=2h,key3=3h", true
+		case "SUB_SUB2_FF":
+			return "aaa", true
 		}
 
 		return "", false
@@ -115,6 +123,9 @@ func TestRead(t *testing.T) {
 
 		Sub: SubConfig{
 			A: "sub",
+			SubSub: SubSubConfig{
+				A: "aaa",
+			},
 		},
 		CustomTextUnmarshaler: CustomTextUnmarshaler{
 			Value: "***custom***",

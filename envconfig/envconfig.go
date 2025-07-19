@@ -91,7 +91,7 @@ func read(le func(string) (string, bool), prefix string, holder any) error {
 				return fmt.Errorf("envconfig: embedded structs must contain \"prefix\" tag: %q does not have it", field.Name)
 			}
 
-			err := read(le, pref+"_", retField.Addr().Interface())
+			err := read(le, prefix+pref+"_", retField.Addr().Interface())
 			if err != nil {
 				return err
 			}
