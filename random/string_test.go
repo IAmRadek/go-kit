@@ -8,16 +8,16 @@ func TestString(t *testing.T) {
 	tests := []struct {
 		name   string
 		length int
-		chars  int
+		chars  Chars
 		want   int
 	}{
-		{"empty length", 0, int(AlphaLarge | AlphaSmall | ZeroNine), 0},
+		{"empty length", 0, AlphaLarge | AlphaSmall | ZeroNine, 0},
 		{"no charset", 10, 0, 0},
-		{"only large", 10, int(AlphaLarge), 10},
-		{"only small", 10, int(AlphaSmall), 10},
-		{"only numbers", 10, int(ZeroNine), 10},
-		{"large and small", 10, int(AlphaLarge | AlphaSmall), 10},
-		{"all chars", 20, int(AlphaLarge | AlphaSmall | ZeroNine), 20},
+		{"only large", 10, AlphaLarge, 10},
+		{"only small", 10, AlphaSmall, 10},
+		{"only numbers", 10, ZeroNine, 10},
+		{"large and small", 10, AlphaLarge | AlphaSmall, 10},
+		{"all chars", 20, AlphaLarge | AlphaSmall | ZeroNine, 20},
 	}
 
 	for _, tt := range tests {
@@ -31,13 +31,13 @@ func TestString(t *testing.T) {
 				// Verify character set presence
 				for _, c := range got {
 					valid := false
-					if tt.chars&int(AlphaLarge) != 0 && c >= 'A' && c <= 'Z' {
+					if tt.chars&AlphaLarge != 0 && c >= 'A' && c <= 'Z' {
 						valid = true
 					}
-					if tt.chars&int(AlphaSmall) != 0 && c >= 'a' && c <= 'z' {
+					if tt.chars&AlphaSmall != 0 && c >= 'a' && c <= 'z' {
 						valid = true
 					}
-					if tt.chars&int(ZeroNine) != 0 && c >= '0' && c <= '9' {
+					if tt.chars&ZeroNine != 0 && c >= '0' && c <= '9' {
 						valid = true
 					}
 					if !valid {

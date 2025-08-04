@@ -12,19 +12,19 @@ const (
 	ZeroNine
 )
 
-func String(length int, chars int) string {
+func String(length int, chars Chars) string {
 	if length <= 0 {
 		return ""
 	}
 
 	var charset string
-	if chars&int(AlphaLarge) != 0 {
+	if chars&AlphaLarge != 0 {
 		charset += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	}
-	if chars&int(AlphaSmall) != 0 {
+	if chars&AlphaSmall != 0 {
 		charset += "abcdefghijklmnopqrstuvwxyz"
 	}
-	if chars&int(ZeroNine) != 0 {
+	if chars&ZeroNine != 0 {
 		charset += "0123456789"
 	}
 
